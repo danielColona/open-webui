@@ -1,4 +1,10 @@
-<script context="module">
+<script context="module" lang="ts">
+	// HeadendAI - patch local de bug do upstream (28/08/2026): este bloco usa
+	// sintaxe TypeScript (Map<string, string[]>()) sem "lang=ts", quebrando o
+	// pre-scan de dependencias do esbuild/Vite ("Expected ';' but found '['").
+	// Confirmado tambem na tag v0.11.1 (release estavel mais recente), nao e
+	// bug so do commit de dev - reavaliar se ainda e necessario ao atualizar
+	// o upstream (pode já ter sido corrigido la).
 	// Persists across mount/unmount cycles (module-level, not per-instance)
 	let savedPath = '/';
 	let savedFileRoot = null;

@@ -103,6 +103,11 @@
 	import Dropdown from '../common/Dropdown.svelte';
 
 	import CommandSuggestionList from './MessageInput/CommandSuggestionList.svelte';
+	// HeadendAI - dropdown de autocomplete de perguntas certificadas
+	// (28/08/2026, ver docs/fork/FORK-autocomplete-certificado.md).
+	// Auto-contido (proprio keydown/debounce) - so precisa ser
+	// renderizado, nao muda nenhuma logica existente deste arquivo.
+	import CertifiedQuestionList from './MessageInput/CertifiedQuestionList.svelte';
 	import Knobs from '../icons/Knobs.svelte';
 	import ValvesModal from '../workspace/common/ValvesModal.svelte';
 	import Note from '../icons/Note.svelte';
@@ -2173,6 +2178,14 @@
 										{/key}
 									{/if}
 								</div>
+
+								<CertifiedQuestionList
+									query={prompt}
+									onSelect={(texto) => {
+										prompt = texto;
+										chatInputElement?.focus?.();
+									}}
+								/>
 							</div>
 
 							<div class=" flex justify-between mt-0.5 mb-2 mx-0.5 max-w-full" dir="ltr">
