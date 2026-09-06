@@ -22,7 +22,34 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  # HeadendAI (06/09/2026): testes ANTES do build, e o build so acontece
+  # se passarem (needs: testes). O build leva minutos e publica direto em
+  # :latest - que e o que o servidor puxa. Publicar primeiro e descobrir
+  # depois seria descobrir em producao.
+  #
+  # O script test:frontend usava `--passWithNoTests` e nao havia nenhum
+  # teste: passava verde sem provar nada. Corrigido junto com a entrada do
+  # primeiro teste nosso (src/lib/apis/headend/index.test.ts).
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Testes de frontend (vitest)
+        run: npm run test:frontend
+
   build:
+    needs: testes
     runs-on: ubuntu-latest
     permissions:
       contents: read

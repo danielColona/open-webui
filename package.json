@@ -18,8 +18,9 @@
 		"format:backend": "ruff format . --exclude .venv --exclude venv",
 		"i18n:parse": "i18next --config i18next-parser.config.ts && prettier --write \"src/lib/i18n/**/*.{js,json}\"",
 		"cy:open": "cypress open",
-		"test:frontend": "vitest --passWithNoTests",
-		"pyodide:fetch": "node scripts/prepare-pyodide.js"
+		"test:frontend": "vitest --run",
+		"pyodide:fetch": "node scripts/prepare-pyodide.js",
+		"test:frontend:watch": "vitest"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "3.2.2",
