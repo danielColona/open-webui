@@ -28,7 +28,10 @@ FROM --platform=$BUILDPLATFORM node:22-alpine3.20 AS build
 ARG BUILD_HASH
 
 # Set Node.js options (heap limit Allocation failed - JavaScript heap out of memory)
-# ENV NODE_OPTIONS="--max-old-space-size=4096"
+# HeadendAI (31/08/2026): host tem so 8GB RAM - "npm run build" direto no host
+# estourou o heap padrao do Node (~2GB) e morreu com OOM. Ativando essa linha
+# (upstream ja deixou pronta, comentada) em vez de builda-lo fora do Docker.
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 WORKDIR /app
 
@@ -40,6 +43,17 @@ RUN npm ci --force
 
 COPY . .
 ENV APP_BUILD_HASH=${BUILD_HASH}
+
+# HeadendAI (01/09/2026): VITE_HEADEND_API_URL e lido em build-time pelo
+# CertifiedQuestionList.svelte (import.meta.env) - so existe em .env local
+# (gitignorado, fora do contexto Docker de proposito, ver .dockerignore),
+# entao sem isso o bundle final compila com o fallback localhost:8000, que
+# no navegador do operador aponta pra maquina dele, nao pro servidor. Mesmo
+# valor ja validado em open-webui/.env (ver docs/fork/FORK-autocomplete-certificado.md).
+# 03/09/2026: URL HTTPS publica (proxy Apache no Nagios, :9445 -> :8000) -
+# ver comentario em open-webui/.env, mesma razao (mixed content HTTPS/HTTP).
+ARG VITE_HEADEND_API_URL=https://179.105.102.53:9445
+ENV VITE_HEADEND_API_URL=${VITE_HEADEND_API_URL}
 RUN npm run build
 
 ######## WebUI backend ########

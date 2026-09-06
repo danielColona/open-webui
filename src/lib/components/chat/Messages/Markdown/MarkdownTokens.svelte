@@ -217,17 +217,19 @@
 		{/if}
 	{:else if token.type === 'table'}
 		<div class="relative w-full group mb-2">
-			<div class="scrollbar-hidden relative overflow-x-auto max-w-full">
+			<div class="scrollbar-hidden relative overflow-x-auto overflow-y-auto max-h-[420px] max-w-full">
 				<table
 					class=" w-full text-sm text-start text-gray-500 dark:text-gray-400 max-w-full rounded-xl"
 					dir="auto"
 				>
-					<thead class="text-xs text-gray-700 uppercase dark:text-gray-400 border-none">
+					<thead
+						class="text-xs text-gray-700 uppercase dark:text-gray-400 border-none sticky top-0 z-10 bg-white dark:bg-gray-900"
+					>
 						<tr class="">
 							{#each token.header as header, headerIdx}
 								<th
 									scope="col"
-									class="px-2.5! py-2! cursor-pointer border-b border-gray-100! dark:border-gray-800!"
+									class="px-2.5! py-2! cursor-pointer font-mono tracking-wide border-b border-gray-100! dark:border-gray-800!"
 									style={token.align[headerIdx] ? `text-align: ${token.align[headerIdx]}` : ''}
 								>
 									<div class="gap-1.5 text-start">
@@ -250,9 +252,10 @@
 							<tr class="text-xs">
 								{#each row ?? [] as cell, cellIdx}
 									<td
-										class="px-3! py-2! text-gray-900 dark:text-white w-max {token.rows.length -
-											1 ===
-										rowIdx
+										class="px-3! py-2! font-mono [font-variant-numeric:tabular-nums] text-gray-900 dark:text-white w-max {cellIdx ===
+										0
+											? 'text-blue-600 dark:text-blue-400 font-semibold'
+											: ''} {token.rows.length - 1 === rowIdx
 											? ''
 											: 'border-b border-gray-50! dark:border-gray-850!'}"
 										style={token.align[cellIdx] ? `text-align: ${token.align[cellIdx]}` : ''}

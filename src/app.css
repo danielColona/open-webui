@@ -748,8 +748,12 @@ body {
 }
 
 .dark body {
-	background: #171717;
-	color: #eee;
+	/* ComH3@ (05/09/2026): fundo/texto do body em dark mode estavam
+	   cravados direto aqui, sem passar pelas --color-gray-* de
+	   tailwind.css - por isso a pagina nunca mudava de cor de fundo de
+	   verdade apesar da paleta ja ter sido trocada la. */
+	background: #0a0b0d;
+	color: #f4f4f5;
 }
 
 /* Position the handle relative to each LI */

@@ -2,6 +2,17 @@
 
 @config '../tailwind.config.js';
 
+/* ComH3@ (05/09/2026, pedido do usuario) - tema dark high-contrast
+   inspirado no VS Code, previsto/aprovado num mockup antes desta edicao
+   (ver docs/design ou o artifact de preview). So os 4 tons mais escuros
+   (800-950, os usados por dark:bg-*) foram escurecidos pra ficar mais
+   perto de preto de verdade (maior contraste com texto claro) - 50-700
+   ficam intactos de proposito, preservam o tema light e os tons mais
+   claros usados dentro do proprio dark mode (texto secundario etc),
+   minimizando risco de quebrar telas nao testadas. blue-* redefinido
+   pra rotear o azul de destaque do app inteiro (botoes primarios, links,
+   estados ativos) pro azul de marca do VS Code (#007acc), sem precisar
+   editar componente por componente. */
 @theme {
 	--color-gray-50: oklch(0.98 0 0);
 	--color-gray-100: oklch(0.94 0 0);
@@ -11,10 +22,15 @@
 	--color-gray-500: oklch(0.69 0 0);
 	--color-gray-600: oklch(0.51 0 0);
 	--color-gray-700: oklch(0.42 0 0);
-	--color-gray-800: oklch(0.32 0 0);
-	--color-gray-850: oklch(0.27 0 0);
-	--color-gray-900: oklch(0.2 0 0);
-	--color-gray-950: oklch(0.16 0 0);
+	--color-gray-800: oklch(0.2 0 0);
+	--color-gray-850: oklch(0.14 0 0);
+	--color-gray-900: oklch(0.085 0 0);
+	--color-gray-950: oklch(0.04 0 0);
+
+	--color-blue-400: #3fa9ff;
+	--color-blue-500: #1f8fe0;
+	--color-blue-600: #007acc;
+	--color-blue-700: #005f9e;
 }
 
 /*

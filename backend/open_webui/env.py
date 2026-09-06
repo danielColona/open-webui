@@ -933,9 +933,14 @@ if LICENSE_PUBLIC_KEY:
 # visual, textual, symbolic identifiers, metadata, and surrounding UI.
 # Do not alter, remove, obscure, or replace it except as LICENSE permits:
 # https://docs.openwebui.com/license.
+#
+# ComH3@ (05/09/2026): full rebrand exercised under LICENSE clause 4(i) -
+# deployment total end users confirmed under 50 within any rolling 30-day
+# period (user's own statement, this is a private internal HeadendAI tool,
+# not a redistributed product). Auto-appending "(Open WebUI)" removed for
+# that reason - re-add it if this deployment ever grows past that
+# threshold without a written permission or enterprise license.
 WEBUI_NAME = os.getenv('WEBUI_NAME', 'Open WebUI')
-if WEBUI_NAME != 'Open WebUI':
-    WEBUI_NAME += ' (Open WebUI)'
 
 # LICENSE covers this Open WebUI branding surface, including this favicon
 # and any visual, textual, or symbolic identifiers it preserves.

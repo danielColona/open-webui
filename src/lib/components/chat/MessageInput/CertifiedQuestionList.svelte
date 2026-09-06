@@ -33,7 +33,15 @@
 	let suggestions: CertifiedSuggestion[] = [];
 	let selectedIdx = 0;
 	let debounceTimer: ReturnType<typeof setTimeout>;
-	let abortController: AbortController | null = null;
+	let containerEl: HTMLDivElement | undefined;
+
+	// So true depois que o operador navega com seta pra valer. Enquanto
+	// falso, Enter NAO seleciona a sugestao destacada por padrao (idx 0) -
+	// evita roubar o Enter de quem so quer enviar o que escreveu, mesmo
+	// com o dropdown aberto por baixo (achado real 28/08/2026, reportado
+	// pelo usuario: Enter "inocente" selecionava a 1a sugestao em vez de
+	// enviar a pergunta digitada).
+	let navegou = false;
 
 	// Nao mostrar enquanto o operador estiver no meio de um comando
 	// especial (/, #, @, $, :) do proprio Open WebUI - evita 2
@@ -45,7 +53,6 @@
 
 	$: if (query !== undefined) {
 		clearTimeout(debounceTimer);
-		abortController?.abort();
 
 		if (!query || query.trim().length < 2 || emComandoEspecial) {
 			suggestions = [];
@@ -54,24 +61,38 @@
 		}
 	}
 
+	// requestToken (nao AbortController) de proposito: o bloco reativo acima
+	// so le `query`/`emComandoEspecial` - se usasse AbortController (reatribuido
+	// aqui dentro de buscar(), uma funcao assincrona), a propria reatribuicao
+	// dispararia o bloco reativo de novo (Svelte re-executa `$:` sempre que uma
+	// dependencia rastreada muda, mesmo vinda de fora), abortando a busca que
+	// acabou de comecar - bug real encontrado 28/08/2026: o backend respondia
+	// 200 OK (confirmado nos logs), mas o navegador descartava a resposta antes
+	// do await completar, `suggestions` nunca era preenchido, dropdown nunca
+	// aparecia. requestToken so e lido dentro de buscar(), nunca no bloco `$:`,
+	// entao reatribui-lo nao causa o mesmo ciclo.
+	let requestToken = 0;
+
 	const buscar = async (texto: string) => {
-		abortController = new AbortController();
+		const meuToken = ++requestToken;
 		try {
-			const resultado = await getCertifiedSuggestions(texto, abortController.signal);
+			const resultado = await getCertifiedSuggestions(texto);
+			if (meuToken !== requestToken) return; // resposta obsoleta, ignora
 			suggestions = resultado;
 			selectedIdx = 0;
+			navegou = false;
 		} catch (e) {
-			if ((e as Error)?.name !== 'AbortError') {
-				console.error('HeadendAI sugestoes:', e);
-			}
+			console.error('HeadendAI sugestoes:', e);
 		}
 	};
 
 	const selectUp = () => {
+		navegou = true;
 		selectedIdx = Math.max(0, selectedIdx - 1);
 	};
 
 	const selectDown = () => {
+		navegou = true;
 		selectedIdx = Math.min(selectedIdx + 1, suggestions.length - 1);
 	};
 
@@ -81,6 +102,14 @@
 			suggestions = [];
 			onSelect(item.texto);
 		}
+	};
+
+	// O campo de chat fica perto do rodape da tela - quando o painel abre
+	// pra baixo (top-full) e nao ha espaco sobrando ate o fim da janela,
+	// ele fica cortado/escondido. Rola a janela o minimo necessario assim
+	// que o painel entra no DOM (roda 1x por abertura, via Svelte action).
+	const rolarParaVisivel = (node: HTMLElement) => {
+		node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 	};
 
 	const handleWindowKeydown = (event: KeyboardEvent) => {
@@ -94,10 +123,30 @@
 			event.preventDefault();
 			event.stopPropagation();
 			selectDown();
-		} else if (event.key === 'Enter' || event.key === 'Tab') {
+		} else if (event.key === 'Tab') {
+			// Tab nao tem uso nativo dentro do campo de texto - continua
+			// completando a sugestao destacada mesmo sem navegacao previa
+			// (atalho tipo "tab-complete" de terminal, sem o risco do Enter).
 			event.preventDefault();
 			event.stopPropagation();
 			select();
+		} else if (event.key === 'Enter') {
+			if (navegou) {
+				event.preventDefault();
+				event.stopPropagation();
+				select();
+			} else {
+				// Enter sem navegacao explicita = intencao de ENVIAR o que foi
+				// digitado, nao selecionar a sugestao destacada por padrao.
+				// Remove o painel do DOM na hora (nao so via `suggestions = []`,
+				// que so aplica no proximo microtask do Svelte) pra que o
+				// `document.getElementById('suggestions-container')` que
+				// MessageInput.svelte ja faz no MESMO evento de keydown
+				// (sincrono, antes desse microtask) nao ache mais o elemento
+				// e deixe o Enter seguir pro envio normal.
+				containerEl?.remove();
+				suggestions = [];
+			}
 		} else if (event.key === 'Escape') {
 			event.preventDefault();
 			event.stopPropagation();
@@ -118,7 +167,9 @@
 		campo de texto de verdade.
 	-->
 	<div
+		bind:this={containerEl}
 		id="suggestions-container"
+		use:rolarParaVisivel
 		class="absolute top-full mt-2 w-full max-w-xl z-50 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-850 text-gray-900 dark:text-white shadow-lg overflow-hidden"
 	>
 		<div class="max-h-60 overflow-y-auto overflow-x-hidden scrollbar-thin text-xs p-1">

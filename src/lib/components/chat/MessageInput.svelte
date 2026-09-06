@@ -722,6 +722,18 @@
 
 	let showInputModal = false;
 
+	// HeadendAI - recall de historico estilo CLI de shell (28/08/2026,
+	// pedido do usuario: "seta pra cima carrega a ultima pergunta no
+	// cursor, tipo cli de server linux"). Substitui o comportamento
+	// nativo de "seta pra cima com campo vazio abre edicao na ultima
+	// mensagem do historico" (que abria uma UI de edicao NA mensagem,
+	// nao carregava o texto de volta no campo) por navegacao de verdade
+	// entre as proprias perguntas ja enviadas NESTE chat, direto no
+	// campo - seta pra cima volta, pra baixo avanca, editar o texto
+	// recarregado sai do modo recall (mesmo espirito de bash/zsh).
+	let historyRecallIdx = -1;
+	let historyRecallTexto = '';
+
 	export let dragged = false;
 	export let dropzoneId = 'chat-pane';
 	let shiftKey = false;
@@ -2078,20 +2090,43 @@
 															stopResponse();
 														}
 
-														if (prompt === '' && e.key == 'ArrowUp') {
-															e.preventDefault();
+														if (
+															(e.key === 'ArrowUp' &&
+																(prompt === '' || historyRecallIdx >= 0)) ||
+															(e.key === 'ArrowDown' && historyRecallIdx >= 0)
+														) {
+															// Editar o texto recarregado manualmente sai do modo
+															// recall (mesmo espirito de bash/zsh) - so continua
+															// navegando se o campo ainda bate com o que foi
+															// carregado da ultima vez.
+															if (historyRecallIdx >= 0 && prompt !== historyRecallTexto) {
+																historyRecallIdx = -1;
+															} else {
+																const userMsgs = history?.currentId
+																	? createMessagesList(history, history.currentId)
+																			.filter((m) => m.role === 'user')
+																			.reverse()
+																	: [];
 
-															const userMessageElement = [
-																...document.getElementsByClassName('user-message')
-															]?.at(-1);
-
-															if (userMessageElement) {
-																userMessageElement.scrollIntoView({ block: 'center' });
-																const editButton = [
-																	...document.getElementsByClassName('edit-user-message-button')
-																]?.at(-1);
-
-																editButton?.click();
+																if (e.key === 'ArrowUp') {
+																	if (historyRecallIdx + 1 < userMsgs.length) {
+																		e.preventDefault();
+																		historyRecallIdx += 1;
+																		historyRecallTexto = userMsgs[historyRecallIdx].content ?? '';
+																		setText(historyRecallTexto);
+																	}
+																} else {
+																	e.preventDefault();
+																	if (historyRecallIdx > 0) {
+																		historyRecallIdx -= 1;
+																		historyRecallTexto = userMsgs[historyRecallIdx].content ?? '';
+																		setText(historyRecallTexto);
+																	} else {
+																		historyRecallIdx = -1;
+																		historyRecallTexto = '';
+																		setText('');
+																	}
+																}
 															}
 														}
 
@@ -2181,10 +2216,7 @@
 
 								<CertifiedQuestionList
 									query={prompt}
-									onSelect={(texto) => {
-										prompt = texto;
-										chatInputElement?.focus?.();
-									}}
+									onSelect={(texto) => setText(texto)}
 								/>
 							</div>
 

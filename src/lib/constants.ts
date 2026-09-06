@@ -4,7 +4,8 @@
 // visual, textual, symbolic identifiers, metadata, and surrounding UI.
 // Do not alter, remove, obscure, or replace it except as LICENSE permits:
 // https://docs.openwebui.com/license.
-export const APP_NAME = 'Open WebUI';
+// ComH3@ (05/09/2026): rebrand under clause 4(i), <50 users - see env.py.
+export const APP_NAME = 'ComH3@';
 
 export const WEBUI_HOSTNAME = '';
 export const WEBUI_BASE_URL = '';
