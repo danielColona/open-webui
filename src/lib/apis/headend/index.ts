@@ -4,8 +4,20 @@
 // (WEBUI_API_BASE_URL) - a API do HeadendAI roda em outro processo/
 // porta (FastAPI, projects/python/api/main.py).
 
-const HEADEND_API_BASE_URL =
-	(import.meta.env.VITE_HEADEND_API_URL as string | undefined) ?? 'http://localhost:8000';
+// Vazio = MESMA ORIGEM (07/09/2026). O padrao era o endereco publico do
+// proxy reverso, cravado no Dockerfile e no workflow - ou seja, o IP e a
+// porta da API do headend ficavam num repositorio publico. Com o valor
+// vazio, a chamada sai como caminho relativo (/consulta/sugestoes) e vai
+// pra propria origem da pagina: nenhum endereco entra no bundle, e de
+// quebra some o CORS e o mixed content, que ja custaram tres bugs em
+// cadeia na Sprint 09.
+//
+// Isso exige que a API esteja publicada sob a MESMA origem da interface
+// (uma regra de proxy a mais no Apache). Enquanto nao estiver, defina
+// VITE_HEADEND_API_URL - em .env local pro `vite dev` (a API roda na 8000
+// e a pagina na 5173, origens diferentes) e na variavel HEADEND_API_URL do
+// repositorio pro build do CI.
+const HEADEND_API_BASE_URL = (import.meta.env.VITE_HEADEND_API_URL as string | undefined) ?? '';
 
 export type CertifiedSuggestion = {
 	texto: string;

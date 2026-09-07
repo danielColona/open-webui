@@ -37,6 +37,16 @@
 	const ehColunaDeMedida = (texto: string | undefined) =>
 		/\btaxa\b|bitrate|mbps|kbps|n[ií]vel|dbmv/i.test(texto ?? '');
 
+	// Colunas de IDENTIFICADOR (o que o operador procura com o olho na
+	// tabela) em azul. Antes so a primeira coluna era azul, por posicao -
+	// mas o identificador nem sempre esta na primeira coluna: em
+	// rfgw_do_canal, por exemplo, o SID vem primeiro, e em canais_do_rfgw
+	// vem depois do host. "canal" no singular de proposito: pega "Canal" e
+	// "Canal virtual" sem pegar "Total canais", que e contagem, nao
+	// identificador.
+	const ehColunaIdentificador = (texto: string | undefined) =>
+		/\bsid\b|\bcanal\b|\bdisplay\b/i.test(texto ?? '');
+
 	export let id: string;
 	export let chatId = '';
 	export let messageId = '';
@@ -264,7 +274,7 @@
 								{#each row ?? [] as cell, cellIdx}
 									<td
 										class="px-3! py-2! font-mono [font-variant-numeric:tabular-nums] text-gray-900 dark:text-white w-max {cellIdx ===
-										0
+											0 || ehColunaIdentificador(token.header[cellIdx]?.text)
 											? 'text-blue-600 dark:text-blue-400 font-semibold'
 											: ''} {ehColunaDeMedida(token.header[cellIdx]?.text)
 											? 'comh3-medida'

@@ -79,6 +79,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # O endereco da API nao pode voltar pro repositorio (ele e publico).
+      # Vem da variavel HEADEND_API_URL (Settings > Secrets and variables >
+      # Actions > Variables). Se ninguem definiu nada, o build PARA aqui em
+      # vez de publicar uma imagem com o autocomplete quebrado em silencio -
+      # a menos que HEADEND_API_SAME_ORIGIN=true diga, explicitamente, que a
+      # API ja esta publicada sob a mesma origem da interface.
+      - name: Resolver o endereco da API
+        run: |
+          URL="${{ vars.HEADEND_API_URL }}"
+          if [ -z "$URL" ] && [ "${{ vars.HEADEND_API_SAME_ORIGIN }}" != "true" ]; then
+            echo "::error::defina a variavel HEADEND_API_URL do repositorio com a URL publica da API do HeadendAI, ou HEADEND_API_SAME_ORIGIN=true se a API ja e servida na mesma origem da interface."
+            exit 1
+          fi
+          echo "VITE_HEADEND_API_URL=$URL" >> "$GITHUB_ENV"
+
       - name: Build e push
         uses: docker/build-push-action@v6
         with:
@@ -88,7 +103,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           build-args: |
-            VITE_HEADEND_API_URL=https://179.105.102.53:9445
+            VITE_HEADEND_API_URL=${{ env.VITE_HEADEND_API_URL }}
             BUILD_HASH=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -52,7 +52,11 @@ ENV APP_BUILD_HASH=${BUILD_HASH}
 # valor ja validado em open-webui/.env (ver docs/fork/FORK-autocomplete-certificado.md).
 # 03/09/2026: URL HTTPS publica (proxy Apache no Nagios, :9445 -> :8000) -
 # ver comentario em open-webui/.env, mesma razao (mixed content HTTPS/HTTP).
-ARG VITE_HEADEND_API_URL=https://179.105.102.53:9445
+# 07/09/2026: o endereco SAIU daqui. Este arquivo e publico, e o valor era o
+# IP:porta real da API do headend na internet. Vazio = mesma origem da
+# pagina (ver src/lib/apis/headend/index.ts); quem precisa de outra origem
+# passa --build-arg / variavel HEADEND_API_URL do repositorio.
+ARG VITE_HEADEND_API_URL=
 ENV VITE_HEADEND_API_URL=${VITE_HEADEND_API_URL}
 RUN npm run build
 
