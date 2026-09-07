@@ -751,9 +751,10 @@ body {
 	/* ComH3@ (05/09/2026): fundo/texto do body em dark mode estavam
 	   cravados direto aqui, sem passar pelas --color-gray-* de
 	   tailwind.css - por isso a pagina nunca mudava de cor de fundo de
-	   verdade apesar da paleta ja ter sido trocada la. */
-	background: #0a0b0d;
-	color: #f4f4f5;
+	   verdade apesar da paleta ja ter sido trocada la.
+	   06/09/2026: valor alinhado ao mockup (--bg do design-preview.html). */
+	background: #0d0d0d;
+	color: #e6e6e6;
 }
 
 /* Position the handle relative to each LI */
@@ -942,4 +943,144 @@ html.high-contrast:not(.dark) .shimmer {
 	background: none;
 	color: var(--color-gray-700);
 	-webkit-text-fill-color: var(--color-gray-700);
+}
+
+/* ======================================================================
+   ComH3@ - tema dark high-contrast (HeadendAI, 06/09/2026)
+
+   Referencia visual: docs/fork/design-preview.html no repo do HeadendAI.
+   Esse arquivo e o alvo; o que estiver aqui tem que bater com ele. A
+   paleta base (fundo, painel, borda, azul) vive em src/tailwind.css,
+   porque o app inteiro ja consome aquelas variaveis - aqui ficam so os
+   tratamentos que nenhuma variavel de cor resolve sozinha.
+
+   Regra que vale pra este bloco inteiro: preferir seletor sobre classe
+   que ja existe no markup do Open WebUI a editar componente Svelte. Cada
+   componente editado e um conflito a mais no proximo merge do upstream
+   (sao 112 commits de distancia hoje), e a maior parte deste visual e
+   cor e espacamento, nao estrutura.
+   ====================================================================== */
+
+.dark {
+	--comh3-ok: #4ec9b0; /* medida ao vivo saudavel (taxa, nivel) */
+	--comh3-warn: #d7ba7d; /* etiqueta MUX */
+	--comh3-crit: #f14c4c;
+	--comh3-mut: #8a8f98; /* rotulo, texto secundario */
+	--comh3-linha: #26282d;
+}
+
+/* ---------- mensagem do operador: bolha no azul de marca ----------
+   O Open WebUI pinta a bolha do usuario com bg-gray-50/800/850 conforme
+   a variante de layout; as tres viram o azul de destaque. */
+.dark .user-message .bg-gray-800,
+.dark .user-message .bg-gray-850,
+.dark .user-message .bg-gray-50 {
+	background-color: var(--color-blue-600);
+	color: #fff;
+}
+.dark .user-message .bg-gray-800 *,
+.dark .user-message .bg-gray-850 *,
+.dark .user-message .bg-gray-50 * {
+	color: #fff;
+}
+
+/* ---------- rotulo de quem fala ----------
+   "OPERADOR" / "COMH3@" acima de cada mensagem, como no mockup. Feito
+   com ::before em vez de componente novo: e texto decorativo, nao entra
+   em selecao/copia de conteudo e nao mexe na arvore de mensagens. */
+.dark .user-message::before {
+	content: 'Operador';
+	display: block;
+	text-align: right;
+	margin: 0 0.5rem 0.375rem 0;
+	font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+	font-size: 10px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--comh3-mut);
+}
+
+/* ---------- tabela ----------
+   O tratamento estrutural (cabecalho fixo, fonte monoespacada, primeira
+   coluna em azul) esta em MarkdownTokens.svelte, onde da pra saber qual
+   e a coluna. Aqui ficam o painel em volta, a barra de rolagem visivel e
+   a etiqueta. */
+.dark .comh3-tabela {
+	border: 1px solid var(--comh3-linha);
+	border-radius: 0.5rem;
+	background: var(--color-gray-900);
+}
+.dark .comh3-tabela thead th {
+	background: var(--color-gray-850);
+	color: var(--comh3-mut);
+	letter-spacing: 0.1em;
+	font-weight: 500;
+}
+.dark .comh3-tabela td.comh3-medida {
+	color: var(--comh3-ok);
+}
+.dark .comh3-tabela tbody tr:hover td {
+	background: rgba(255, 255, 255, 0.02);
+}
+
+/* Etiqueta (MUX e afins): o pipe manda `MUX` como codigo inline no
+   Markdown, entao vira <code> dentro da celula - sem precisar de sintaxe
+   propria nem de HTML cru, que o renderizador sanitiza. Se este CSS nao
+   carregar, continua legivel como codigo. */
+.dark .comh3-tabela td code {
+	padding: 1px 5px;
+	border-radius: 3px;
+	background: rgba(215, 186, 125, 0.14);
+	color: var(--comh3-warn);
+	font-size: 9.5px;
+	letter-spacing: 0.08em;
+	white-space: nowrap;
+}
+
+/* Barra de rolagem visivel dentro da tabela. O Open WebUI esconde todas
+   (.scrollbar-hidden); numa tabela de 24 portadoras dentro de uma janela
+   de 420px, esconder a barra esconde que existe mais conteudo - o
+   operador nao rola porque nao sabe que ha o que rolar. */
+.comh3-rolagem {
+	scrollbar-width: thin;
+}
+.comh3-rolagem::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+.dark .comh3-rolagem::-webkit-scrollbar-track {
+	background: var(--color-gray-900);
+}
+.dark .comh3-rolagem::-webkit-scrollbar-thumb {
+	background: #3a3d44;
+	border: 2px solid var(--color-gray-900);
+	border-radius: 5px;
+}
+.dark .comh3-rolagem::-webkit-scrollbar-thumb:hover {
+	background: #4a4e57;
+}
+
+/* ---------- rotulo de quem respondeu ----------
+   No mockup e um rotulo pequeno, monoespacado e em caixa alta acima da
+   resposta. O Open WebUI ja tem esse elemento (#response-message-model-name,
+   com o nome do modelo) - restilizado em vez de duplicado: assim o rotulo
+   continua dizendo QUEM respondeu de verdade, que e informacao util quando
+   ha mais de um pipe/modelo instalado. */
+.dark #response-message-model-name {
+	font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+	font-size: 10px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--comh3-mut);
+}
+
+/* ---------- wordmark ----------
+   O nome vem de WEBUI_NAME ("ComH3@", definido no compose) e a LICENSE
+   exige que ele continue visivel - o que muda aqui e so a tipografia, pra
+   bater com o mockup. Nao remover nem obscurecer. */
+.dark #sidebar-webui-name {
+	font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: #e6e6e6;
 }

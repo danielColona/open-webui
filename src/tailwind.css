@@ -22,10 +22,17 @@
 	--color-gray-500: oklch(0.69 0 0);
 	--color-gray-600: oklch(0.51 0 0);
 	--color-gray-700: oklch(0.42 0 0);
-	--color-gray-800: oklch(0.2 0 0);
-	--color-gray-850: oklch(0.14 0 0);
-	--color-gray-900: oklch(0.085 0 0);
-	--color-gray-950: oklch(0.04 0 0);
+	/* Os quatro tons escuros sao os do mockup, em hex, nao mais aproximados
+	   em oklch (06/09/2026): a referencia versionada e
+	   docs/fork/design-preview.html no repo do HeadendAI, e conferir "igual
+	   a foto" exige o MESMO valor, nao um vizinho. O papel de cada um segue
+	   o uso que o proprio Open WebUI ja faz deles:
+	     950 = fundo da aplicacao      900 = painel / barra lateral / cabecalho
+	     850 = superficie secundaria   800 = borda, divisor, hover           */
+	--color-gray-800: #26282d;
+	--color-gray-850: #1a1c20;
+	--color-gray-900: #141518;
+	--color-gray-950: #0d0d0d;
 
 	--color-blue-400: #3fa9ff;
 	--color-blue-500: #1f8fe0;

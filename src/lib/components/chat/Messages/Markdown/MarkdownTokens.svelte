@@ -28,6 +28,15 @@
 	import Clipboard from '$lib/components/icons/Clipboard.svelte';
 	import ColonFenceBlock from './ColonFenceBlock.svelte';
 
+	// ComH3@ (HeadendAI, 06/09/2026) - colunas que carregam MEDIDA ao vivo
+	// (taxa, nivel) sao pintadas em verde na tabela, como no mockup
+	// (docs/fork/design-preview.html). A decisao e pelo CABECALHO, nao por
+	// posicao: as respostas do motor tem colunas em ordens diferentes
+	// conforme a intencao, e "a 7a coluna" nao quer dizer nada. O CSS de
+	// apoio esta em src/app.css, secao ComH3@.
+	const ehColunaDeMedida = (texto: string | undefined) =>
+		/\btaxa\b|bitrate|mbps|kbps|n[ií]vel|dbmv/i.test(texto ?? '');
+
 	export let id: string;
 	export let chatId = '';
 	export let messageId = '';
@@ -216,8 +225,10 @@
 			{token.text}
 		{/if}
 	{:else if token.type === 'table'}
-		<div class="relative w-full group mb-2">
-			<div class="scrollbar-hidden relative overflow-x-auto overflow-y-auto max-h-[420px] max-w-full">
+		<div class="relative w-full group mb-2 comh3-tabela">
+			<div
+				class="comh3-rolagem relative overflow-x-auto overflow-y-auto max-h-[420px] max-w-full rounded-lg"
+			>
 				<table
 					class=" w-full text-sm text-start text-gray-500 dark:text-gray-400 max-w-full rounded-xl"
 					dir="auto"
@@ -255,6 +266,8 @@
 										class="px-3! py-2! font-mono [font-variant-numeric:tabular-nums] text-gray-900 dark:text-white w-max {cellIdx ===
 										0
 											? 'text-blue-600 dark:text-blue-400 font-semibold'
+											: ''} {ehColunaDeMedida(token.header[cellIdx]?.text)
+											? 'comh3-medida'
 											: ''} {token.rows.length - 1 === rowIdx
 											? ''
 											: 'border-b border-gray-50! dark:border-gray-850!'}"
