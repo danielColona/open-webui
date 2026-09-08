@@ -1078,6 +1078,15 @@ html.high-contrast:not(.dark) .shimmer {
    O nome vem de WEBUI_NAME ("ComH3@", definido no compose) e a LICENSE
    exige que ele continue visivel - o que muda aqui e so a tipografia, pra
    bater com o mockup. Nao remover nem obscurecer. */
+#sidebar-webui-name {
+	/* Maior que o padrao do upstream (pedido do usuario, 07/09/2026): num
+	   produto de marca propria o wordmark e a ancora visual da barra
+	   lateral, e no tamanho herdado ele competia de igual pra igual com
+	   os itens de menu logo abaixo. Fora do bloco .dark porque tamanho
+	   nao depende de tema. */
+	font-size: 1.0625rem;
+	line-height: 1.2;
+}
 .dark #sidebar-webui-name {
 	font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 	font-weight: 600;

@@ -72,7 +72,7 @@
 		<!-- Keine Vorschläge -->
 
 		<div
-			class="flex w-full {$settings?.landingPageMode === 'chat'
+			class="flex flex-col w-full {$settings?.landingPageMode === 'chat'
 				? ' -mt-1'
 				: 'text-center items-center justify-center'}  self-start text-gray-600 dark:text-gray-400"
 		>
@@ -80,6 +80,10 @@
 			Do not alter, remove, obscure, or replace it except as LICENSE permits:
 			https://docs.openwebui.com/license. -->
 			{$WEBUI_NAME} ‧ v{WEBUI_VERSION}
+			<!-- ComH3@ (HeadendAI, 07/09/2026): assinatura ABAIXO do identificador,
+			numa linha propria. O identificador acima fica intacto e visivel - nao e
+			alterado, removido nem encoberto; so ganha uma linha embaixo. -->
+			<span class="text-[0.7rem] leading-tight opacity-70">by Colona</span>
 		</div>
 	{/if}
 </div>
