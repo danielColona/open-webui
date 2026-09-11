@@ -63,6 +63,7 @@
 	import FullHeightIframe from '$lib/components/common/FullHeightIframe.svelte';
 	import OutputEditView from './OutputEditView.svelte';
 	import { getOutputText, replaceOutputMessageText, type OutputItem } from './structuredOutput';
+	import { textoParaFala } from '$lib/utils/headendFala';
 
 	interface MessageType {
 		id: string;
@@ -242,7 +243,10 @@
 			: $config?.audio?.tts?.voice);
 
 	const speak = async () => {
-		const content = visibleResponseContent;
+		// ComH3@: o HeadendAI marca a frase a ser falada; sem marcador isto
+		// devolve o proprio conteudo, entao qualquer outro modelo segue
+		// igual. Ver src/lib/utils/headendFala.ts.
+		const content = textoParaFala(visibleResponseContent);
 		if (!content.trim().length) {
 			toast.info($i18n.t('No content to speak'));
 			return;

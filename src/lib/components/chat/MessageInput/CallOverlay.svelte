@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { config, models, settings, showCallOverlay, TTSWorker } from '$lib/stores';
+	import { textoParaFala } from '$lib/utils/headendFala';
 	import { onMount, tick, getContext, onDestroy, createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
@@ -395,7 +396,11 @@
 		return $config?.audio?.tts?.voice;
 	};
 
-	const speakSpeechSynthesisHandler = (content) => {
+	const speakSpeechSynthesisHandler = (bruto) => {
+		// ComH3@: mesma regra do speak() da mensagem - no modo mãos livres
+		// ler a tabela inteira seria ainda pior, porque o operador esta com
+		// as maos ocupadas e nao consegue nem interromper na tela.
+		const content = textoParaFala(bruto);
 		if ($showCallOverlay) {
 			return new Promise((resolve) => {
 				let voices = [];
