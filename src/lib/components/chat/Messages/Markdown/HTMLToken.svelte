@@ -129,6 +129,17 @@
 		{/if}
 	{:else if token.text.trim().match(/^<br\s*\/?>$/i)}
 		<br />
+	{:else if token.text.trim().match(/^(?:<!--[\s\S]*?-->\s*)+$/)}
+		<!-- ComH3@ (HeadendAI, 07/09/2026): comentario HTML nao e conteudo -
+		nao pode ser impresso como texto.
+
+		O DOMPurify (linha 14) apaga comentarios, entao `html` fica vazio,
+		nenhuma das condicoes acima casa e o {:else} final imprimia a
+		string crua na tela do operador. Os marcadores do HeadendAI
+		(<!--FALA:...-->
+		e <!--HEADEND_ESTADO:...-->) apareciam no chat - o de estado desde que existe, so ninguem tinha
+		reparado porque o fluxo de esclarecimento e raro. Achado pelo usuario na primeira pergunta feita
+		por voz. -->
 	{:else}
 		{token.text}
 	{/if}

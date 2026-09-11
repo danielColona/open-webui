@@ -205,6 +205,9 @@
 
 	let loadingSpeech = false;
 	let speakAbort: AbortController | null = null;
+	// Espera das vozes do navegador. Guardado fora de speak() porque
+	// stopAudio() precisa cancelar - ver o comentario la embaixo.
+	let esperaDeVozes: ReturnType<typeof setInterval> | null = null;
 
 	let showRateComment = false;
 
@@ -224,6 +227,22 @@
 	const stopAudio = () => {
 		speakAbort?.abort();
 		speakAbort = null;
+
+		// ComH3@ (07/09/2026): cancela tambem a ESPERA pelas vozes, nao so
+		// a fala em andamento.
+		//
+		// `speechSynthesis.speak()` ENFILEIRA. Com a voz do navegador o
+		// speak() nao fala na hora: agenda um setInterval ate
+		// getVoices() responder. Duas chamadas proximas (o clique do
+		// operador e o auto-playback da resposta, por exemplo) deixavam
+		// DOIS intervalos vivos - o cancel() da segunda nao tinha o que
+		// cancelar ainda, e os dois disparavam depois, enfileirando duas
+		// falas. Sintoma: a resposta narrada duas vezes, reportado pelo
+		// usuario no primeiro uso real de voz.
+		if (esperaDeVozes) {
+			clearInterval(esperaDeVozes);
+			esperaDeVozes = null;
+		}
 
 		try {
 			speechSynthesis.cancel();
@@ -260,10 +279,11 @@
 
 		if ($config.audio.tts.engine === '') {
 			let voices = [];
-			const getVoicesLoop = setInterval(() => {
+			esperaDeVozes = setInterval(() => {
 				voices = speechSynthesis.getVoices();
 				if (voices.length > 0) {
-					clearInterval(getVoicesLoop);
+					if (esperaDeVozes) clearInterval(esperaDeVozes);
+					esperaDeVozes = null;
 
 					const voice = voices.find((v) => v.voiceURI === getVoiceId());
 					const speech = new SpeechSynthesisUtterance(content);
