@@ -2813,7 +2813,20 @@
 				copyToClipboard(visibleContent);
 			}
 
-			if ($settings.responseAutoPlayback && !$showCallOverlay) {
+			// ComH3@ (14/09/2026): uma auto-reproducao por MENSAGEM.
+			//
+			// Este bloco roda a cada evento de conclusao que chega pelo
+			// socket, e nada garante que venha so um - com pipe nao-streaming
+			// o `done` pode chegar mais de uma vez pra mesma resposta. Cada
+			// passagem clicava o botao de falar de novo, e como
+			// speechSynthesis.speak() ENFILEIRA, o operador ouvia a resposta
+			// duas vezes (reportado no uso real de voz).
+			//
+			// A marca fica na propria mensagem, nao numa variavel do
+			// componente: ela precisa sobreviver a re-render e valer por
+			// resposta, nao por sessao.
+			if ($settings.responseAutoPlayback && !$showCallOverlay && !message.autoPlaybackDone) {
+				message.autoPlaybackDone = true;
 				await tick();
 				document.getElementById(`speak-button-${message.id}`)?.click();
 			}
