@@ -12,6 +12,21 @@
 
 	$: text = token.type === 'html' ? token?.text : null;
 	$: html = text ? DOMPurify.sanitize(text) : null;
+
+	// ComH3@ (HeadendAI): comentario HTML nao e conteudo e nao pode ser
+	// impresso como texto.
+	//
+	// O DOMPurify acima apaga comentarios, entao `html` fica vazio, nenhuma
+	// das condicoes do markup casa, e o {:else} final imprimia a string
+	// crua na tela do operador. Os dois marcadores do HeadendAI (o de fala
+	// e o de estado de esclarecimento) apareciam no chat.
+	//
+	// A explicacao mora AQUI, em comentario de JS, e nao no markup: um
+	// comentario de template que contenha a sequencia de fechamento de
+	// comentario HTML termina cedo, e o resto do texto vira conteudo
+	// renderizado. Foi exatamente o que aconteceu na primeira versao desta
+	// correcao - o comentario citava os marcadores literalmente e despejou
+	// meia explicacao no fim de toda resposta, em producao.
 </script>
 
 {#if token.type === 'html'}
@@ -130,16 +145,7 @@
 	{:else if token.text.trim().match(/^<br\s*\/?>$/i)}
 		<br />
 	{:else if token.text.trim().match(/^(?:<!--[\s\S]*?-->\s*)+$/)}
-		<!-- ComH3@ (HeadendAI, 07/09/2026): comentario HTML nao e conteudo -
-		nao pode ser impresso como texto.
-
-		O DOMPurify (linha 14) apaga comentarios, entao `html` fica vazio,
-		nenhuma das condicoes acima casa e o {:else} final imprimia a
-		string crua na tela do operador. Os marcadores do HeadendAI
-		(<!--FALA:...-->
-		e <!--HEADEND_ESTADO:...-->) apareciam no chat - o de estado desde que existe, so ninguem tinha
-		reparado porque o fluxo de esclarecimento e raro. Achado pelo usuario na primeira pergunta feita
-		por voz. -->
+		{''}
 	{:else}
 		{token.text}
 	{/if}
