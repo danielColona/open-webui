@@ -28,6 +28,7 @@
 		filtrarIndices,
 		montarCopia,
 		textoSimples,
+		larguraDoTitulo,
 		LOTE_PINTURA,
 		type Direcao
 	} from '$lib/utils/headendTabela';
@@ -238,7 +239,11 @@
 										class="comh3-caixa"
 										class:comh3-caixa-cheia={colunasMarcadas.includes(headerIdx)}
 									></span>
-									<span class="comh3-titulo">
+									<span
+										class="comh3-titulo"
+										style="min-width: {larguraDoTitulo(cabecalhos[headerIdx])}ch"
+										title={cabecalhos[headerIdx]}
+									>
 										<MarkdownInlineTokens
 											id={`${id}-${tokenIdx}-header-${headerIdx}`}
 											tokens={header.tokens}

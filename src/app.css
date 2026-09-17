@@ -1197,11 +1197,23 @@ html.high-contrast:not(.dark) .shimmer {
    de marcar e a seta de ordenar ao lado o cabecalho ficou apertado. Agora
    ele quebra dentro da largura da coluna. */
 .comh3-titulo {
-	min-width: 0;
 	white-space: normal;
-	overflow-wrap: break-word;
+	/* NUNCA quebrar dentro da palavra. Com break-word a largura minima da
+	   celula vira UM caractere, e numa tabela larga o navegador espremia a
+	   coluna ate o titulo descer letra por letra, na vertical (achado pelo
+	   usuario numa tabela de 24 colunas). A largura que garante duas linhas
+	   vem calculada por coluna, em `ch` (larguraDoTitulo, headendTabela.ts). */
+	overflow-wrap: normal;
+	word-break: keep-all;
 	line-height: 1.2;
 	text-align: start;
+	/* Teto de duas linhas: um titulo que ainda assim precise de tres e
+	   cortado com reticencias, e o nome inteiro fica no title= do elemento.
+	   Sem o teto, uma coluna sozinha empurraria a altura de todas. */
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
 }
 
 /* O CORPO nunca quebra: o operador le a tabela varrendo colunas, e uma

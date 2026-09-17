@@ -218,3 +218,34 @@ export function textoSimples(celula: any): string | null {
 	if (!tokens.every((t: any) => t?.type === 'text')) return null;
 	return tokens.map((t: any) => t.raw ?? '').join('');
 }
+
+/**
+ * Largura minima (em `ch`) para o titulo de uma coluna caber em DUAS
+ * linhas (17/09/2026).
+ *
+ * O bug que motivou: com `overflow-wrap: break-word`, a largura minima de
+ * uma celula de cabecalho vira UM caractere, e numa tabela larga o
+ * navegador espremia a coluna ate o titulo virar texto vertical, letra por
+ * letra. Quebrar so entre palavras resolve o vertical, mas ai a largura
+ * minima passa a ser a maior PALAVRA - "Taxa atual (Mbps)" viraria tres
+ * linhas ("Taxa" / "atual" / "(Mbps)").
+ *
+ * Entao a largura e escolhida aqui: o melhor corte em duas linhas, ou seja
+ * o que deixa a linha mais longa o menor possivel. "Taxa atual (Mbps)" da
+ * 10 ("Taxa atual" / "(Mbps)"); "SID" da 3. O teto de 18 evita que um
+ * titulo enorme domine a tabela - se precisar de uma terceira linha, o CSS
+ * corta com reticencias e o nome inteiro fica no `title` do elemento.
+ */
+export function larguraDoTitulo(texto: string, teto = 18): number {
+	const palavras = (texto ?? '').trim().split(/\s+/).filter(Boolean);
+	if (palavras.length === 0) return 3;
+	if (palavras.length === 1) return Math.min(teto, palavras[0].length);
+
+	let melhor = Infinity;
+	for (let corte = 1; corte < palavras.length; corte++) {
+		const a = palavras.slice(0, corte).join(' ').length;
+		const b = palavras.slice(corte).join(' ').length;
+		melhor = Math.min(melhor, Math.max(a, b));
+	}
+	return Math.min(teto, melhor);
+}

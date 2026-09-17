@@ -7,7 +7,8 @@ import {
 	montarCopia,
 	tabelaFoiCortada,
 	textoDaCelula,
-	textoSimples
+	textoSimples,
+	larguraDoTitulo
 } from './headendTabela';
 
 // Celula no formato que o `marked` entrega.
@@ -225,5 +226,31 @@ describe('textoSimples', () => {
 	it('forma inesperada vai pro componente, nunca estoura', () => {
 		expect(textoSimples(undefined)).toBeNull();
 		expect(textoSimples({})).toBeNull();
+	});
+});
+
+describe('larguraDoTitulo', () => {
+	it('escolhe o corte que equilibra as duas linhas', () => {
+		// "Taxa atual" / "(Mbps)" - a linha mais longa tem 10.
+		expect(larguraDoTitulo('Taxa atual (Mbps)')).toBe(10);
+	});
+
+	it('titulo de uma palavra pede a largura dela, sem quebrar', () => {
+		expect(larguraDoTitulo('SID')).toBe(3);
+		expect(larguraDoTitulo('Multicast')).toBe(9);
+	});
+
+	it('duas palavras cortam entre elas', () => {
+		expect(larguraDoTitulo('Total TS')).toBe(5); // "Total" / "TS"
+		expect(larguraDoTitulo('Canal virtual')).toBe(7); // "Canal" / "virtual"
+	});
+
+	it('titulo enorme e limitado pelo teto (o CSS corta com reticencias)', () => {
+		expect(larguraDoTitulo('Entrada multicast do transport stream principal')).toBe(18);
+	});
+
+	it('nunca devolve largura de uma letra - foi isso que virou texto vertical', () => {
+		for (const t of ['Taxa atual (Mbps)', 'Taxa média (Mbps)', 'Direção', 'I/O', 'Porta', ''])
+			expect(larguraDoTitulo(t)).toBeGreaterThanOrEqual(3);
 	});
 });
