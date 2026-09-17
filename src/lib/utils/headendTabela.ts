@@ -191,3 +191,30 @@ export function tabelaFoiCortada(tokens: any[], indiceDaTabela: number): boolean
 	if (!proximo || proximo.type !== 'paragraph') return false;
 	return /n[ãa]o mostradas/i.test(proximo.raw ?? proximo.text ?? '');
 }
+
+/**
+ * Quantas linhas a tabela desenha de cada vez (17/09/2026).
+ *
+ * A mensagem agora traz a resposta INTEIRA (ate 1000 linhas, o teto do
+ * motor): filtro, ordenacao e copia valem sobre tudo. O que fica limitado e
+ * so o DESENHO - 1000 x 18 colunas sao 18 mil celulas, e o operador pede
+ * mais com um clique. Dado completo, desenho sob demanda.
+ */
+export const LOTE_PINTURA = 200;
+
+/**
+ * O texto de uma celula que e SO texto, ou `null` se ela tiver qualquer
+ * outra coisa (a etiqueta `MUX` e codigo inline, `\|` vira token de escape).
+ *
+ * Existe pra desenhar a celula comum direto, sem montar um componente
+ * Svelte por celula. A saida e IDENTICA: com a resposta completa, o
+ * TextToken do Open WebUI desenha exatamente `token.raw` (conferido em
+ * MarkdownInlineTokens/TextToken.svelte) - e o Svelte escapa o texto do
+ * mesmo jeito nos dois caminhos, entao "A&E" continua "A&E".
+ */
+export function textoSimples(celula: any): string | null {
+	const tokens = celula?.tokens;
+	if (!Array.isArray(tokens)) return null;
+	if (!tokens.every((t: any) => t?.type === 'text')) return null;
+	return tokens.map((t: any) => t.raw ?? '').join('');
+}

@@ -1199,6 +1199,18 @@ html.high-contrast:not(.dark) .shimmer {
 	color: var(--comh3-warn, #d7ba7d);
 	font-size: 10.5px;
 }
+/* Rodape "mostrar mais": a resposta ja chegou inteira, so falta desenhar.
+   A frase diz isso com todas as letras - sem ela, "desenhadas 200 de 253"
+   parece dizer que o filtro so enxerga 200. */
+.comh3-mais {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	padding: 0.4rem 0.6rem;
+	border-top: 1px solid var(--comh3-linha, rgba(128, 128, 128, 0.2));
+	font-size: 11px;
+}
 .comh3-vazio {
 	padding: 0.6rem;
 	text-align: center;

@@ -6,7 +6,8 @@ import {
 	filtrarIndices,
 	montarCopia,
 	tabelaFoiCortada,
-	textoDaCelula
+	textoDaCelula,
+	textoSimples
 } from './headendTabela';
 
 // Celula no formato que o `marked` entrega.
@@ -187,5 +188,42 @@ describe('tabelaFoiCortada', () => {
 	it('tabela inteira nao e marcada como cortada', () => {
 		expect(tabelaFoiCortada([{ type: 'table' }], 0)).toBe(false);
 		expect(tabelaFoiCortada([{ type: 'table' }, nota('outra coisa')], 0)).toBe(false);
+	});
+});
+
+describe('textoSimples', () => {
+	it('celula so de texto sai como o raw, igual ao TextToken', () => {
+		expect(textoSimples({ tokens: [{ type: 'text', raw: 'SPORTV HD', text: 'SPORTV HD' }] })).toBe(
+			'SPORTV HD'
+		);
+	});
+
+	it('ampersand do nome real do canal passa intacto (o Svelte escapa na saida)', () => {
+		expect(textoSimples({ tokens: [{ type: 'text', raw: 'MHE A&E MUNDO SD RJO' }] })).toBe(
+			'MHE A&E MUNDO SD RJO'
+		);
+	});
+
+	it('celula com a etiqueta MUX (codigo inline) vai pro componente', () => {
+		const celula = {
+			tokens: [
+				{ type: 'text', raw: 'TS06 ' },
+				{ type: 'codespan', raw: '`MUX`', text: 'MUX' }
+			]
+		};
+		expect(textoSimples(celula)).toBeNull();
+	});
+
+	it('celula com barra escapada (\\|) vai pro componente', () => {
+		expect(textoSimples({ tokens: [{ type: 'escape', raw: '\\|', text: '|' }] })).toBeNull();
+	});
+
+	it('celula vazia sai vazia', () => {
+		expect(textoSimples({ tokens: [] })).toBe('');
+	});
+
+	it('forma inesperada vai pro componente, nunca estoura', () => {
+		expect(textoSimples(undefined)).toBeNull();
+		expect(textoSimples({})).toBeNull();
 	});
 });

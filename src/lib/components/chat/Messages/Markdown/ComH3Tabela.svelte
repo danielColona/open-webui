@@ -27,6 +27,8 @@
 		ordenarIndices,
 		filtrarIndices,
 		montarCopia,
+		textoSimples,
+		LOTE_PINTURA,
 		type Direcao
 	} from '$lib/utils/headendTabela';
 
@@ -47,6 +49,7 @@
 	let filtrosPorColuna: string[] = [];
 	let mostrarFiltroPorColuna = false;
 	let colunasMarcadas: number[] = [];
+	let limitePintura = LOTE_PINTURA;
 
 	$: cabecalhos = (token.header ?? []).map((h: any) => textoDaCelula(h));
 	$: linhas = token.rows ?? [];
@@ -62,6 +65,23 @@
 	})();
 
 	$: filtrando = filtroGeral.trim().length > 0 || filtrosPorColuna.some((f) => (f ?? '').trim());
+
+	// A resposta vem inteira; so o DESENHO e em lotes (ver LOTE_PINTURA).
+	// Filtro, ordenacao e copia trabalham sobre `visiveis`, nunca sobre
+	// `pintadas` - senao "copiar" levaria so o que coube na tela.
+	$: pintadas = visiveis.slice(0, limitePintura);
+	$: faltam = visiveis.length - pintadas.length;
+	$: proximoLote = Math.min(LOTE_PINTURA, faltam);
+
+	// Cor e realce decididos uma vez por COLUNA. Antes era por celula: com
+	// 1000 linhas x 18 colunas, 18 mil testes de regex a cada redesenho.
+	$: classeColuna = cabecalhos.map((h, i) =>
+		[
+			i === 0 || ehColunaIdentificador(h) ? 'text-blue-600 dark:text-blue-400 font-semibold' : '',
+			ehColunaDeMedida(h) ? 'comh3-medida' : ''
+		].join(' ')
+	);
+	$: marcada = cabecalhos.map((_, i) => colunasMarcadas.includes(i));
 
 	// Tres estados no clique da seta: crescente -> decrescente -> ordem do
 	// motor. A terceira parada existe porque a ordem original carrega
@@ -85,6 +105,7 @@
 		ordem = null;
 		colunasMarcadas = [];
 		mostrarFiltroPorColuna = false;
+		limitePintura = LOTE_PINTURA;
 	};
 
 	const copiar = async (formato: 'tsv' | 'lista') => {
@@ -95,7 +116,8 @@
 			colunasMarcadas.length === 1
 				? `coluna ${cabecalhos[colunasMarcadas[0]]}`
 				: `${quantas} colunas`;
-		toast.success(`Copiado: ${nomes}, ${visiveis.length} linha(s)`);
+		const extra = faltam > 0 ? ` (inclui as ${faltam} ainda não desenhadas)` : '';
+		toast.success(`Copiado: ${nomes}, ${visiveis.length} linha(s)${extra}`);
 	};
 </script>
 
@@ -259,29 +281,31 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each visiveis as rowIdx, posicao}
+				{#each pintadas as rowIdx, posicao (rowIdx)}
 					<tr class="text-xs">
 						{#each token.rows[rowIdx] ?? [] as cell, cellIdx}
+							{@const simples = done ? textoSimples(cell) : null}
 							<td
-								class="px-3! py-2! font-mono [font-variant-numeric:tabular-nums] text-gray-900 dark:text-white w-max {cellIdx ===
-									0 || ehColunaIdentificador(cabecalhos[cellIdx])
-									? 'text-blue-600 dark:text-blue-400 font-semibold'
-									: ''} {ehColunaDeMedida(cabecalhos[cellIdx])
-									? 'comh3-medida'
-									: ''} {visiveis.length - 1 === posicao
+								class="px-3! py-2! font-mono [font-variant-numeric:tabular-nums] text-gray-900 dark:text-white w-max {classeColuna[
+									cellIdx
+								] ?? ''} {pintadas.length - 1 === posicao
 									? ''
 									: 'border-b border-gray-50! dark:border-gray-850!'}"
-								class:comh3-marcada={colunasMarcadas.includes(cellIdx)}
+								class:comh3-marcada={marcada[cellIdx]}
 								style={token.align[cellIdx] ? `text-align: ${token.align[cellIdx]}` : ''}
 							>
 								<div class="break-normal">
-									<MarkdownInlineTokens
-										id={`${id}-${tokenIdx}-row-${rowIdx}-${cellIdx}`}
-										tokens={cell.tokens}
-										{done}
-										{sourceIds}
-										{onSourceClick}
-									/>
+									{#if simples !== null}
+										{simples}
+									{:else}
+										<MarkdownInlineTokens
+											id={`${id}-${tokenIdx}-row-${rowIdx}-${cellIdx}`}
+											tokens={cell.tokens}
+											{done}
+											{sourceIds}
+											{onSourceClick}
+										/>
+									{/if}
 								</div>
 							</td>
 						{/each}
@@ -290,6 +314,30 @@
 			</tbody>
 		</table>
 	</div>
+
+	{#if faltam > 0}
+		<div class="comh3-mais">
+			<span class="comh3-contagem">
+				desenhadas {pintadas.length} de {visiveis.length} — filtro, ordem e cópia já valem para todas
+			</span>
+			<button
+				type="button"
+				class="comh3-botao comh3-copiar"
+				on:click={() => (limitePintura += LOTE_PINTURA)}
+			>
+				mostrar mais {proximoLote}
+			</button>
+			{#if faltam > LOTE_PINTURA}
+				<button
+					type="button"
+					class="comh3-botao"
+					on:click={() => (limitePintura = visiveis.length)}
+				>
+					mostrar todas
+				</button>
+			{/if}
+		</div>
+	{/if}
 
 	{#if filtrando && visiveis.length === 0}
 		<div class="comh3-vazio">Nenhuma linha casa com o filtro.</div>
