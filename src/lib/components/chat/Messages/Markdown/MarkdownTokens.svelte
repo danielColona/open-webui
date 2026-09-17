@@ -25,6 +25,8 @@
 	import ConsecutiveDetailsGroup from './ConsecutiveDetailsGroup.svelte';
 
 	import HtmlToken from './HTMLToken.svelte';
+	import ComH3Tabela from './ComH3Tabela.svelte';
+	import { tabelaFoiCortada } from '$lib/utils/headendTabela';
 	import Clipboard from '$lib/components/icons/Clipboard.svelte';
 	import ColonFenceBlock from './ColonFenceBlock.svelte';
 
@@ -235,97 +237,23 @@
 			{token.text}
 		{/if}
 	{:else if token.type === 'table'}
-		<div class="relative w-full group mb-2 comh3-tabela">
-			<div
-				class="comh3-rolagem relative overflow-x-auto overflow-y-auto max-h-[420px] max-w-full rounded-lg"
-			>
-				<table
-					class=" w-full text-sm text-start text-gray-500 dark:text-gray-400 max-w-full rounded-xl"
-					dir="auto"
-				>
-					<thead
-						class="text-xs text-gray-700 uppercase dark:text-gray-400 border-none sticky top-0 z-10 bg-white dark:bg-gray-900"
-					>
-						<tr class="">
-							{#each token.header as header, headerIdx}
-								<th
-									scope="col"
-									class="px-2.5! py-2! cursor-pointer font-mono tracking-wide border-b border-gray-100! dark:border-gray-800!"
-									style={token.align[headerIdx] ? `text-align: ${token.align[headerIdx]}` : ''}
-								>
-									<div class="gap-1.5 text-start">
-										<div class="shrink-0 break-normal">
-											<MarkdownInlineTokens
-												id={`${id}-${tokenIdx}-header-${headerIdx}`}
-												tokens={header.tokens}
-												{done}
-												{sourceIds}
-												{onSourceClick}
-											/>
-										</div>
-									</div>
-								</th>
-							{/each}
-						</tr>
-					</thead>
-					<tbody>
-						{#each token.rows as row, rowIdx}
-							<tr class="text-xs">
-								{#each row ?? [] as cell, cellIdx}
-									<td
-										class="px-3! py-2! font-mono [font-variant-numeric:tabular-nums] text-gray-900 dark:text-white w-max {cellIdx ===
-											0 || ehColunaIdentificador(token.header[cellIdx]?.text)
-											? 'text-blue-600 dark:text-blue-400 font-semibold'
-											: ''} {ehColunaDeMedida(token.header[cellIdx]?.text)
-											? 'comh3-medida'
-											: ''} {token.rows.length - 1 === rowIdx
-											? ''
-											: 'border-b border-gray-50! dark:border-gray-850!'}"
-										style={token.align[cellIdx] ? `text-align: ${token.align[cellIdx]}` : ''}
-									>
-										<div class="break-normal">
-											<MarkdownInlineTokens
-												id={`${id}-${tokenIdx}-row-${rowIdx}-${cellIdx}`}
-												tokens={cell.tokens}
-												{done}
-												{sourceIds}
-												{onSourceClick}
-											/>
-										</div>
-									</td>
-								{/each}
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-
-			<div class=" absolute top-1 right-1.5 z-20 hover-reveal flex gap-0.5">
-				<Tooltip content={$i18n.t('Copy')}>
-					<button
-						class="p-1 rounded-lg bg-transparent transition"
-						on:click={(e) => {
-							e.stopPropagation();
-							copyToClipboard(token.raw.trim(), null, $settings?.copyFormatted ?? false);
-						}}
-					>
-						<Clipboard className=" size-3.5" strokeWidth="1.5" />
-					</button>
-				</Tooltip>
-
-				<Tooltip content={$i18n.t('Export to CSV')}>
-					<button
-						class="p-1 rounded-lg bg-transparent transition"
-						on:click={(e) => {
-							e.stopPropagation();
-							exportTableToCSVHandler(token, tokenIdx);
-						}}
-					>
-						<Download className=" size-3.5" strokeWidth="1.5" />
-					</button>
-				</Tooltip>
-			</div>
-		</div>
+		<!-- ComH3@ (HeadendAI, 17/09/2026): a tabela virou componente proprio.
+		     Ela precisa de estado por instancia (ordem, filtros, colunas
+		     marcadas) e este arquivo renderiza TODAS as tabelas de TODAS as
+		     mensagens no mesmo componente. Alem disso o bloco do upstream tinha
+		     ~90 linhas editadas por nos; agora sao estas. -->
+		<ComH3Tabela
+			{token}
+			{id}
+			{tokenIdx}
+			{done}
+			{sourceIds}
+			{onSourceClick}
+			{ehColunaDeMedida}
+			{ehColunaIdentificador}
+			onExportCSV={exportTableToCSVHandler}
+			cortada={tabelaFoiCortada(tokens, tokenIdx)}
+		/>
 	{:else if token.type === 'blockquote'}
 		{@const alert = alertComponent(token)}
 		{#if alert}

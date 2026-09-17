@@ -19,7 +19,9 @@ const COMPONENTES_DO_FORK = [
 	'src/lib/components/chat/Chat.svelte',
 	'src/lib/components/chat/MessageInput/CallOverlay.svelte',
 	'src/lib/components/chat/Suggestions.svelte',
-	'src/lib/components/chat/MessageInput/CertifiedQuestionList.svelte'
+	'src/lib/components/chat/MessageInput/CertifiedQuestionList.svelte',
+	'src/lib/components/chat/Messages/Markdown/ComH3Tabela.svelte',
+	'src/lib/components/chat/Messages/Markdown/MarkdownTokens.svelte'
 ];
 
 const FECHA = '--' + '>';
