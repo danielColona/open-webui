@@ -238,7 +238,7 @@
 										class="comh3-caixa"
 										class:comh3-caixa-cheia={colunasMarcadas.includes(headerIdx)}
 									></span>
-									<span class="shrink-0 break-normal">
+									<span class="comh3-titulo">
 										<MarkdownInlineTokens
 											id={`${id}-${tokenIdx}-header-${headerIdx}`}
 											tokens={header.tokens}

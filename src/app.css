@@ -1119,13 +1119,19 @@ html.high-contrast:not(.dark) .shimmer {
    clicar no nome pra selecionar nao cabem no mesmo gesto. */
 .comh3-cabecalho {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 0.3rem;
 	justify-content: space-between;
+	/* Duas linhas de altura, sempre. O titulo pode quebrar (ver
+	   .comh3-titulo) e a caixa de marcar mais a seta de ordenar ocupam a
+	   primeira linha - sem altura reservada, cada coluna fica com uma
+	   altura diferente conforme o nome quebre ou nao, e o cabecalho
+	   embola. Reservando, o cabecalho tem sempre a mesma cara. */
+	min-height: 2.4em;
 }
 .comh3-marcar {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 0.3rem;
 	background: transparent;
 	color: inherit;
@@ -1136,6 +1142,7 @@ html.high-contrast:not(.dark) .shimmer {
 }
 .comh3-caixa {
 	flex: none;
+	margin-top: 0.2em; /* acompanha a primeira linha do titulo, nao o centro */
 	width: 9px;
 	height: 9px;
 	border-radius: 2px;
@@ -1182,6 +1189,27 @@ html.high-contrast:not(.dark) .shimmer {
 }
 .comh3-filtro-coluna:focus {
 	border-color: var(--comh3-azul, #007acc);
+}
+
+/* Quebra de linha SO no titulo da coluna (17/09/2026, pedido do usuario:
+   "aplicar wrap text apenas nos titulos das colunas"). O titulo tinha
+   shrink-0, entao nunca quebrava - a coluna e que alargava, e com a caixa
+   de marcar e a seta de ordenar ao lado o cabecalho ficou apertado. Agora
+   ele quebra dentro da largura da coluna. */
+.comh3-titulo {
+	min-width: 0;
+	white-space: normal;
+	overflow-wrap: break-word;
+	line-height: 1.2;
+	text-align: start;
+}
+
+/* O CORPO nunca quebra: o operador le a tabela varrendo colunas, e uma
+   celula de duas linhas desalinha a leitura. Quem nao couber sai pela
+   rolagem horizontal, que ja existe (.comh3-rolagem). white-space e
+   herdado, entao isto tambem vale pra div de dentro da celula. */
+.comh3-tabela tbody td {
+	white-space: nowrap;
 }
 
 /* Coluna marcada pra copia: o realce vai na coluna INTEIRA, nao so no
